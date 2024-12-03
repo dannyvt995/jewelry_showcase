@@ -3,21 +3,19 @@
 import { useEffect } from 'react';
 import { useStoreAsset } from '../store/useStoreAsset';
 import * as THREE from 'three';
-import { RGBELoader, CubeTextureLoader, EXRLoader, TextureLoader } from 'three-stdlib';
+import useLoaderStore from '../store/useStoreLoader'
 export const useLoadTextures = () => {
-    const loaderExr = new EXRLoader();
-    const { setExrTexture, setHdrTexture } = useStoreAsset();
-    console.log("// Chỉ gọi một lần khi hook được gọi")
+    const loader = useLoaderStore((state) => state.loaderExr);
+    const { setTextures } = useStoreAsset();
+
     useEffect(() => {
-        // Tải exrTexture
         const loadExrTexture = () => {
             return new Promise((resolve, reject) => {
-                loaderExr.load(
+                loader.load(
                     '/ring/env/env-metal-008.exr',
                     (texture) => {
                         texture.mapping = THREE.EquirectangularReflectionMapping;
-                        setExrTexture(texture); // Lưu vào store
-                        resolve(texture);
+                        resolve({ exrTexture: texture });
                     },
                     undefined,
                     (error) => {
@@ -27,18 +25,29 @@ export const useLoadTextures = () => {
             });
         };
 
-        // Tải hdrTexture
         const loadHdrTexture = () => {
-            return loaderExr.loadAsync('/ring/env/env-gem-002.exr').then((texture) => {
+            return loader.loadAsync('/ring/env/env-gem-002.exr').then((texture) => {
                 texture.mapping = THREE.EquirectangularReflectionMapping;
-                setHdrTexture(texture); // Lưu vào store
-                return texture;
+                return { hdrTexture: texture };
             });
         };
 
-        // Khởi tạo tải texture
-        loadExrTexture().catch((error) => console.error(error));
-        loadHdrTexture().catch((error) => console.error(error));
+        Promise.all([loadExrTexture(), loadHdrTexture()])
+            .then(([exrResult, hdrResult]) => {
+                setTextures({
+                    exrTexture: exrResult.exrTexture,
+                    hdrTexture: hdrResult.hdrTexture,
+                });
+                console.log("==> Textures load complete");
+            })
+            .catch((error) => {
+                console.error(error);
+            });
 
-    }, []); 
+       
+        return () => {
+            console.log("Clean up useLoadTextures");
+        };
+    }, [loader,setTextures]);
+
 };

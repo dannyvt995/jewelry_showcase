@@ -47,11 +47,11 @@ export  const makeDiamond = (geo,scene,camera,clientWidth,clientHeight,hdr, {
     collider.material.transparent = true;
     collider.visible = false;
     collider.boundsTree = mergedGeometry.boundsTree;
-    scene.add(collider);
+    //scene.add(collider);
     const visualizer = new MeshBVHVisualizer(collider, 20);
-    visualizer.visible = false;
+    visualizer.visible = true;
     visualizer.update();
-    //scene.add(visualizer);
+    scene.add(visualizer);
     const diamond = new THREE.Mesh(geo, new THREE.ShaderMaterial({
         uniforms: {
             envMap: { value: hdr },

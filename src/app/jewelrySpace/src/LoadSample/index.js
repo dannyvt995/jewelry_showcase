@@ -26,19 +26,23 @@ const Model = React.memo(({ id }) => {
     loader.load(`/ring/collection/${id}.glb`, (gltf) => {
       if (isMounted) {
    
-        currentModel = gltf.scenes[0].children[0]
+        currentModel = null
    
-        setModel(currentModel)
+        setModel(gltf.scene)
       }
     })
   
     return () => {
       isMounted = false
-      if (currentModel) {
-       disposeScene(currentModel)
-        currentModel = []
+      if (model) {
+       disposeScene({
+        sceneOrigin:scene,
+        sceneCustom:model
+       })
+       setModel(null)
       }
-      setModel(null)
+   
+     
     }
   }, [id, loader])
 
@@ -47,11 +51,14 @@ const Model = React.memo(({ id }) => {
   ) : null
 })
 
-const disposeScene = (scene) => {
+const disposeScene = ({
+  sceneOrigin,
+  sceneCustom
+ }) => {
   console.log("///////////////////disposeScene/////////////clear memory")
-
-  scene.traverse((child) => {
-   
+  sceneCustom.removeFromParent();
+  sceneCustom.traverse((child) => {
+  // console.log(child)
     if (child.geometry) {
       child.geometry.dispose()
     }
@@ -64,7 +71,7 @@ const disposeScene = (scene) => {
      
         })
       } else {
-        console.log("dispose material")
+        //console.log("dispose material")
         clearTextureInMaterial(child.material)
 
       }
@@ -93,6 +100,9 @@ const disposeScene = (scene) => {
   }
 
   })
+  sceneOrigin.remove(sceneCustom)
+ // console.log(scene)
+  //scene.clear()
 }
 const clearTextureInMaterial = (material) => {
   if (material.map) {
