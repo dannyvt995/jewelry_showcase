@@ -6,7 +6,7 @@ import * as THREE from 'three'
 
 
 import { makeDiamond } from '../../../../utils/DiamondN8.js'
-import { MeshRefractionMaterial, useTexture, useEnvironment } from '@react-three/drei'
+import { MeshRefractionMaterial, useTexture, useEnvironment, Resize } from '@react-three/drei'
 import React, { useRef } from 'react'
 import { RGBELoader, CubeTextureLoader, EXRLoader, TextureLoader } from 'three-stdlib';
 import { useThree } from '@react-three/fiber';
@@ -17,13 +17,13 @@ const color = {
 const checkList1 = {
     "model1": "Diamond",
     "model2": "Diamond",
-    "model3": "Diamond_Pear",
-    "model4": "Diamond_Pear",
+    "model3": "Brillant_",
+    "model4": "GG_Round",
     "model5": "GG_Pear",
-    "model6": "group5_polySurface",
+    "model6": "Round",
     "model7": "GemOnCrv",
     "model8": "mesh_2",
-    "model9": "Diamond_Pear",
+    "model9": "mesh_56",
     "model10": "Gems",
 
 }
@@ -54,6 +54,7 @@ export default function HandleModel({ model, id }) {
   // console.log(value,`\\b${value}\\b`,child.name,regexDiamond.test(child.name))
   model.traverse((child) => {
     if (child.type === "Mesh") {
+        console.log(child.name)
         if (regexDiamond.test(child.name)) {
             // Dispose old geometry and material before creating new ones
             if (child.geometry) child.geometry.dispose();
@@ -131,7 +132,7 @@ export default function HandleModel({ model, id }) {
     }, [hdrTexture, exrTexture, scene, camera])
 
     React.useEffect(() => {
-      //  if (priRefSam.current) priRefSam.current.rotation.x = 6
+        if (priRefSam.current) priRefSam.current.rotation.x = -5
 
         return () => {
             model.traverse((child) => {
@@ -178,9 +179,11 @@ export default function HandleModel({ model, id }) {
 
 
     return (
-        <>
-            <primitive ref={priRefSam} object={model} />
-        </>
+      
+        <Resize>
+        <primitive ref={priRefSam} object={model} />
+        </Resize>
+
     )
 }
 
