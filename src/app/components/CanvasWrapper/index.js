@@ -1,9 +1,11 @@
 "use client"
-import { View, Preload, Environment } from '@react-three/drei'
+import { View, Preload, Environment, OrbitControls } from '@react-three/drei'
 import { Canvas } from '@react-three/fiber'
 import { Perf } from 'r3f-perf'
 import {useEffect,useState} from 'react'
 
+import { Pathtracer, PhysicalCamera, Fog } from '../../../utils/Pathtracer.js'
+import LoadControls from '../../jewelrySpace/src/LoadControls/index.js'
 export default function CanvasWrapper() {
     console.log("==> INIT CanvasWrapper ONCE TIME");
     const [eventSource, setEventSource] = useState(null)
@@ -22,7 +24,11 @@ export default function CanvasWrapper() {
             eventSource={eventSource}
             dpr={1} gl={{ antialias: false, alpha: true }} shadows camera={{ position: [0, 0, 15], fov: 35, near: 0.5, far: 100 }}>
    
-            <View.Port />
+
+  
+        <View.Port />
+
+         
             <Preload all />
             <Perf />
 
