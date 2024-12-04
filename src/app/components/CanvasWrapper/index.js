@@ -8,6 +8,7 @@ import { Pathtracer, PhysicalCamera, Fog } from '../../../utils/Pathtracer.js'
 import LoadControls from '../../jewelrySpace/src/LoadControls/index.js'
 export default function CanvasWrapper() {
     console.log("==> INIT CanvasWrapper ONCE TIME");
+    
     const [eventSource, setEventSource] = useState(null)
     useEffect(() => {
         if (typeof document !== 'undefined') {

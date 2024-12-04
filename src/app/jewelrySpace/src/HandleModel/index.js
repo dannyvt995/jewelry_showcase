@@ -1,16 +1,16 @@
 "use client"
 import * as THREE from 'three'
-
-
-
-
-
-import { makeDiamond } from '../../../../utils/DiamondN8.js'
-import { MeshRefractionMaterial, useTexture, useEnvironment, Resize } from '@react-three/drei'
+import { Resize } from '@react-three/drei'
 import React, { useRef } from 'react'
-import { RGBELoader, CubeTextureLoader, EXRLoader, TextureLoader } from 'three-stdlib';
 import { useThree } from '@react-three/fiber';
 import { useStoreAsset } from '../../../store/useStoreAsset.js';
+import { vertDiamond, fragDiamond } from '../glsl/diamondN8.js'
+
+import {
+    MeshBVH,
+    MeshBVHUniformStruct,
+    SAH
+} from '../../../../lib/three-mesh-bvh@0.5.10';
 const color = {
     gold: 16434308
 }
@@ -28,108 +28,75 @@ const checkList1 = {
 
 }
 export default function HandleModel({ model, id }) {
-    const { exrTexture, hdrTexture} = useStoreAsset();
+    const { exrTexture, hdrTexture } = useStoreAsset();
     const { scene, camera } = useThree()
-    const modelRef = React.useRef()
-    
-    const priRef = React.useRef()
+
     const priRefSam = React.useRef()
-    const [completeLoad, setCompleteLoad] = React.useState(false)
-    const meshListRef = React.useRef([])
-    const [hdr, setHdr] = React.useState(null);
-    const [exr, setExr] = React.useState(null);
     const clientWidth = window.innerWidth * 0.1;
     const clientHeight = window.innerHeight * 0.1;
+
     const value = checkList1[id];
     const regexDiamond = new RegExp(`\\b${value}(?=_)|\\b${value}\\b|${value}`, 'i');
+    // console.log(value,`\\b${value}\\b`,child.name,regexDiamond.test(child.name))
 
-    const refMat = useRef(null)
-    const refMesh = useRef(null)
+    const refMatDefault = useRef(null)
+    const refMatDiamond = useRef(null)
     React.useEffect(() => {
-        if(hdrTexture && exrTexture && scene && camera) {
+        if (hdrTexture && exrTexture) {
             // chuyển đi.........
             scene.environment = hdrTexture
             scene.background = hdrTexture;
 
-  // console.log(value,`\\b${value}\\b`,child.name,regexDiamond.test(child.name))
-  model.traverse((child) => {
-    if (child.type === "Mesh") {
-        console.log(child.name)
-        if (regexDiamond.test(child.name)) {
-            // Dispose old geometry and material before creating new ones
-            if (child.geometry) child.geometry.dispose();
-            
-            if (child.material) {
-              
-                child.material.dispose();
-                if (child.material.envMap) {
-                    child.material.envMap.dispose();
-                }
-
-            }
-
-            // Create new geometry and material
-            let meshdf = makeDiamond(child.geometry, scene, camera, clientWidth, clientHeight, hdrTexture);
-       //     child.geometry = meshdf.geometry;
-            child.material = meshdf.material;
-
-            // Dispose the new mesh resources
-            meshdf.geometry.dispose();
-            if (meshdf.material) {
-                meshdf.material.dispose();
-                if (meshdf.material.envMap) {
-                    meshdf.material.envMap.dispose();
-                }
-            }
-
-            meshdf = null;
-        } else {
-            // Dispose old material
-            if (child.material) {
-                child.material.dispose();
-                if (child.material.envMap) {
-                    child.material.envMap.dispose();
-                }
-            }
-
-            // Create new material
-            let matdf = new THREE.MeshStandardMaterial({
+            refMatDefault.current = new THREE.MeshStandardMaterial({
                 roughness: 0.1,
-                metalness: 1, 
-                envMap: exrTexture,        
-                color: color.gold           
+                metalness: 1,
+                envMap: exrTexture,
+                color: color.gold
             });
 
-            child.material = matdf;
 
-            // Dispose new material resources
-            matdf.dispose();
-            if (matdf.envMap) {
-                matdf.envMap.dispose();
-            }
+            model.traverse((child) => {
+                if (child.type === "Mesh") {
+                    //  console.log(child.name)
+                    if (child.material && child.material.dispose) {
+                        child.material.dispose();
+                    }
+                    if (regexDiamond.test(child.name)) {
+                        let matDiamond = createShaderDiamond(child.geometry, camera, clientWidth, clientHeight, hdrTexture)
 
-            matdf = null;
-        }
-    }
-});
+                        if (child.material && child.material.dispose) {
+                            child.material.dispose();
+                        }
+                        child.material = matDiamond;
+                        matDiamond.dispose()
+                
+                        // matDiamond.uniforms.envMap.value.dispose()
+                        // matDiamond.uniforms.envMap.value = null
+                        matDiamond = null
+                    } else {
 
-        }
-        return() => {
-            if(refMat.current) {
-                refMat.current.dispose()
-                refMat.current = null
-            }
-            if(refMesh.current) {
-                if(refMesh.current.geometry) {
-                    refMesh.current.geometry.dispose()
-                } 
-                if(refMesh.current.material) {
-                    refMesh.current.material.dispose()
+                        child.material = refMatDefault.current;
+                    }
                 }
-                refMesh.current = null
-            }
+            });
+
         }
-    }, [hdrTexture, exrTexture, scene, camera])
+        return () => {
+            model.traverse((child) => {
+                if (child.isMesh && child.material) {
+                    if (Array.isArray(child.material)) {
+                        child.material.forEach((mat) => mat.dispose());
+                    } else {
+                        child.material.dispose();
+                    }
+                }
+            });
+            disposeRefMaterial(refMatDiamond.current)
+            refMatDiamond.current = null
+            disposeRefMaterial(refMatDefault.current)
+            refMatDefault.current = null
+        }
+    }, [hdrTexture, exrTexture,model])
 
     React.useEffect(() => {
         if (priRefSam.current) priRefSam.current.rotation.x = -5
@@ -137,54 +104,114 @@ export default function HandleModel({ model, id }) {
         return () => {
             model.traverse((child) => {
                 if (child.type === "Mesh") {
-              
+                    
                     if (child.geometry) {
                         child.geometry.dispose();
                     }
                     if (child.material) {
-                    
+
                         if (Array.isArray(child.material)) {
                             child.material.forEach(mat => {
-                                if (mat.map) mat.map.dispose();  
-                                if (mat.envMap) mat.envMap.dispose(); 
-                                mat.dispose(); 
+                                if (mat.map) mat.map.dispose();
+                                if (mat.envMap) mat.envMap.dispose();
+                                mat.dispose();
                             });
                         } else {
                             if (child.material.map) child.material.map.dispose();
                             if (child.material.envMap) child.material.envMap.dispose();
+                            if (child.material.uniforms && child.material.uniforms.envMap.value) {
+                                child.material.uniforms.envMap.value.dispose();
+                                child.material.uniforms.envMap.value = null;
+                            }
+                            if (child.material.uniforms && child.material.uniforms.bvh.value) {
+                                child.material.uniforms.bvh.value.bvhBounds.dispose();
+                                child.material.uniforms.bvh.value.bvhContents.dispose();
+                                child.material.uniforms.bvh.value.index.dispose();
+                                child.material.uniforms.bvh.value.position.dispose();
+                            }
                             child.material.dispose();
                         }
                     }
-                    
+
                 }
             })
 
-            if(refMat.current) {
-                refMat.current.dispose()
-                refMat.current = null
-            }
-            if(refMesh.current) {
-                if(refMesh.current.geometry) {
-                    refMesh.current.geometry.dispose()
-                } 
-                if(refMesh.current.material) {
-                    refMesh.current.material.dispose()
-                }
-                refMesh.current = null
-            }
 
-                if (priRefSam.current) priRefSam.current = null
+            if (priRefSam.current) priRefSam.current = null
         }
     }, [])
 
 
     return (
-      
+
         <Resize>
-        <primitive ref={priRefSam} object={model} />
+            <primitive ref={priRefSam} object={model} />
         </Resize>
 
     )
 }
 
+const initBvhForDiamond = (geometry) => {
+    geometry.boundsTree = new MeshBVH(geometry.toNonIndexed(), { lazyGeneration: false, strategy: SAH });
+    const collider = new THREE.Mesh(geometry);
+    collider.boundsTree = geometry.boundsTree;
+    return collider
+}
 
+const createShaderDiamond = (geometry, camera, clientWidth, clientHeight, hdrTexture) => {
+    const collider = initBvhForDiamond(geometry)
+    const COLOR = new THREE.Color(1, 1, 1)
+    const IOR = 2.4
+    const material = new THREE.ShaderMaterial({
+        uniforms: {
+            envMap: { value: hdrTexture },
+            bvh: { value: new MeshBVHUniformStruct() },
+            bounces: { value: 3 }, //3
+            color: { value: COLOR },
+            ior: { value: IOR },
+            correctMips: { value: false },
+            projectionMatrixInv: { value: camera.projectionMatrixInverse },
+            viewMatrixInv: { value: camera.matrixWorld },
+            chromaticAberration: { value: false },
+            aberrationStrength: { value: 0.01 },
+            resolution: { value: new THREE.Vector2(clientWidth, clientHeight) }
+        },
+        vertexShader: vertDiamond,
+        fragmentShader: fragDiamond
+    })
+    material.uniforms.bvh.value.updateFrom(collider.boundsTree);
+    return material
+}
+
+const disposeRefDiamond = (ref) => {
+    if (ref) {
+        if (ref.geometry) ref.geometry.dispose();
+        if (ref.material) {
+            ref.material.dispose();
+            if (ref.material.uniforms.envMap) {
+                ref.material.uniforms.envMap.value.dispose();
+                ref.material.uniforms.envMap.value = null;
+            }
+            if (ref.material.envMap) {
+                ref.material.envMap.dispose();
+                ref.material.envMap = null;
+            }
+        }
+        ref = null;
+    }
+}
+
+const disposeRefMaterial = (ref) => {
+    if (ref) {
+        ref.dispose();
+        if (ref.uniforms && ref.uniforms.envMap) {
+            ref.uniforms.envMap.value.dispose();
+            ref.uniforms.envMap.value = null;
+        }
+        if (ref.envMap) {
+            ref.envMap.dispose();
+            ref.envMap = null;
+        }
+
+    }
+}

@@ -1,74 +1,8 @@
-
 import {
-    MeshBVH,
-    MeshBVHVisualizer,
-    MeshBVHUniformStruct,
-    FloatVertexAttributeTexture,
     shaderStructs,
     shaderIntersectFunction,
-    SAH
-} from '../lib/three-mesh-bvh@0.5.10';
-import * as THREE from 'three'
-
-export  const makeDiamond = (geo,scene,camera,clientWidth,clientHeight,hdr, {
-    color = new THREE.Color(1, 1, 1),
-    ior = 2.4
-} = {}) => {
-
-    // const ambientLight = new THREE.AmbientLight(new THREE.Color(1.0, 1.0, 1.0), 0.25);
-    // scene.add(ambientLight);
-    // const directionalLight = new THREE.DirectionalLight(0xffffff, 0.35);
-    // directionalLight.position.set(150, 200, 50);
-    // // Shadows
-    // directionalLight.castShadow = true;
-    // directionalLight.shadow.mapSize.width = 1024;
-    // directionalLight.shadow.mapSize.height = 1024;
-    // directionalLight.shadow.camera.left = -75;
-    // directionalLight.shadow.camera.right = 75;
-    // directionalLight.shadow.camera.top = 75;
-    // directionalLight.shadow.camera.bottom = -75;
-    // directionalLight.shadow.camera.near = 0.1;
-    // directionalLight.shadow.camera.far = 500;
-    // directionalLight.shadow.bias = -0.001;
-    // directionalLight.shadow.blurSamples = 8;
-    // directionalLight.shadow.radius = 4;
-    // scene.add(directionalLight);
-    // const directionalLight2 = new THREE.DirectionalLight(0xffffff, 0.15);
-    // directionalLight2.color.setRGB(1.0, 1.0, 1.0);
-    // directionalLight2.position.set(-50, 200, -150);
-    // scene.add(directionalLight2);
-
-
-    const mergedGeometry = geo;
-    mergedGeometry.boundsTree = new MeshBVH(mergedGeometry.toNonIndexed(), { lazyGeneration: false, strategy: SAH });
-    
-    const collider = new THREE.Mesh(mergedGeometry);
-     collider.boundsTree = mergedGeometry.boundsTree;
-    // collider.material.wireframe = true;
-    // collider.material.opacity = 0.5;
-    // collider.material.transparent = true;
-    // collider.visible = false;
-   
-    // //scene.add(collider);
-    // const visualizer = new MeshBVHVisualizer(collider, 20);
-    // visualizer.visible = true;
-    // visualizer.update();
-    // scene.add(visualizer);
-    const diamond = new THREE.Mesh(geo, new THREE.ShaderMaterial({
-        uniforms: {
-            envMap: { value: hdr },
-            bvh: { value: new MeshBVHUniformStruct() },
-            bounces: { value: 3 }, //3
-            color: { value: color },
-            ior: { value: ior },
-            correctMips: { value: false },
-            projectionMatrixInv: { value: camera.projectionMatrixInverse },
-            viewMatrixInv: { value: camera.matrixWorld },
-            chromaticAberration: { value: false },
-            aberrationStrength: { value: 0.01 },
-            resolution: { value: new THREE.Vector2(clientWidth, clientHeight) }
-        },
-        vertexShader: /*glsl*/ `
+} from '../../../../lib/three-mesh-bvh@0.5.10';
+export const vertDiamond = `
     varying vec3 vWorldPosition;
     varying vec3 vNormal;
     uniform mat4 viewMatrixInv;
@@ -77,9 +11,10 @@ export  const makeDiamond = (geo,scene,camera,clientWidth,clientHeight,hdr, {
         vNormal = (viewMatrixInv * vec4(normalMatrix * normal, 0.0)).xyz;
         gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(position, 1.0);
     }
-    `,
-        fragmentShader: /*glsl*/ `
-    precision highp isampler2D;
+`
+
+export const fragDiamond = `
+  precision highp isampler2D;
     precision highp usampler2D;
     varying vec3 vWorldPosition;
     varying vec3 vNormal;
@@ -149,12 +84,5 @@ export  const makeDiamond = (geo,scene,camera,clientWidth,clientHeight,hdr, {
             finalColor *= color;
         }
         gl_FragColor = vec4(vec3(finalColor), 1.0);
-    // gl_FragColor = vec4(vec3(1.,0.,0.), 1.0);
-    }
-    `
-    }));
-    diamond.material.uniforms.bvh.value.updateFrom(collider.boundsTree);
-    diamond.castShadow = true;
-    diamond.receiveShadow = true;
-    return diamond;
 }
+`

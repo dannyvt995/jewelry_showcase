@@ -5,7 +5,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { OrbitControls, PerspectiveCamera, Environment, AdaptiveDpr, View, Preload } from '@react-three/drei'
 import s from './style.module.css'
 import { Soda, Apple, Duck, Candy, Flash, Target } from '../../jewelrySpace/src/Models'
-import { Canvas } from "@react-three/fiber";
+import { Canvas, useThree } from "@react-three/fiber";
 import { Perf } from "r3f-perf";
 import LoadSample from "../../jewelrySpace/src/LoadSample";
 import { Bloom, Sepia, Scanline, Pixelation, N8AO, SSAO ,EffectComposer, Noise, ChromaticAberration ,DepthOfField} from '@react-three/postprocessing'
