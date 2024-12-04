@@ -1,10 +1,10 @@
 
-import LoadModel from "../../jewelryModuleProgress/LoadModel";
+import LoadModel from "../LoadModel";
 import { Bloom, Sepia, Scanline, Pixelation, N8AO, SSAO ,EffectComposer, Noise, ChromaticAberration ,DepthOfField} from '@react-three/postprocessing'
-import { ViewBuffer, ViewEffectsWrapper, ViewPostProcessing } from "../../../utils/ViewEffectsComposerWrapper";
+import { ViewBuffer, ViewEffectsWrapper, ViewPostProcessing } from "../../utils/ViewEffectsComposerWrapper";
 import { BlendFunction } from 'postprocessing'
-import LoadControls from '../../jewelryModuleProgress/LoadControls'
-import SceneWrapper from '../../jewelryModuleProgress/LoadControls'
+import LoadControls from '../LoadControls'
+import SceneWrapper from '../LoadControls'
 import s from './style.module.css'
 import { memo } from "react";
 function ViewDrei({ modelId }) {

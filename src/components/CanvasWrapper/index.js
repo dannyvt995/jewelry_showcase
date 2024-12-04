@@ -1,17 +1,15 @@
 "use client"
-import { View, Preload, Environment, OrbitControls } from '@react-three/drei'
+import { View, Preload } from '@react-three/drei'
 import { Canvas } from '@react-three/fiber'
 import { Perf } from 'r3f-perf'
 import {useEffect,useState} from 'react'
 
-import { Pathtracer, PhysicalCamera, Fog } from '../../../utils/Pathtracer.js'
-import LoadControls from '../../jewelryModuleProgress/LoadControls/index.js'
 export default function CanvasWrapper() {
     console.log("==> INIT CanvasWrapper ONCE TIME");
     
     const [eventSource, setEventSource] = useState(null)
     useEffect(() => {
-        if (typeof document !== 'undefined') {
+        if (typeof document !== 'undefined' && typeof window !== 'undefined') {
             setEventSource(document.getElementById('root'))
             console.log("????",eventSource)
         }

@@ -1,7 +1,7 @@
 "use client"
 import { Canvas } from '@react-three/fiber'
 import { Gltf, Backdrop, OrbitControls, Environment, Resize } from '@react-three/drei'
-import { Pathtracer, PhysicalCamera, Fog } from '../../utils/Pathtracer.js'
+import { Pathtracer, PhysicalCamera, Fog } from '../utils/Pathtracer.js'
 import { Perf } from 'r3f-perf'
 
 export default function page() {

@@ -8,19 +8,20 @@ import { useThree } from '@react-three/fiber';
 import { useStoreAsset } from '../../store/useStoreAsset.js';
 
 
-import { paramsMaterial, checkDiamond } from '../../../data/all_props.js';
+import { paramsMaterial, checkDiamond } from '../../data/all_props.js';
 
 import { createMaterialGui } from '../../hooks/useMaterialGUI.js'
-import { createMaterialDiamond, initBvhForDiamond } from '../../../utils/makeDiamondCustom.js'
+import { createMaterialDiamond, initBvhForDiamond } from '../../utils/makeDiamondCustom.js'
 
 export default function HandleModel({ model, id }) {
     const { exrTexture, hdrTexture } = useStoreAsset();
     const { scene, camera } = useThree()
 
     const priRefSam = React.useRef()
-    const clientWidth = window.innerWidth * 0.1;
-    const clientHeight = window.innerHeight * 0.1;
-
+    // const clientWidth = window.innerWidth * 0.1;
+    // const clientHeight = window.innerHeight * 0.1;
+    const clientWidth = 512;
+    const clientHeight = 512;
 
     // console.log(value,`\\b${value}\\b`,child.name,regexDiamond.test(child.name))
 

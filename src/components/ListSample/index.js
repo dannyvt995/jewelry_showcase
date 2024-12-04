@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect } from "react";
 
 import ViewDrei from '../../jewelryModuleProgress/ViewDrei'
-import {listModels} from '../../../data/all_props'
+import {listModels} from '../../data/all_props'
 
 import s from './style.module.css'
 
