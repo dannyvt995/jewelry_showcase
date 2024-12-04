@@ -3,7 +3,7 @@ export default function LoadControls({...props}) {
   return (
   <>
   <PerspectiveCamera makeDefault zoom={1} position={[0, 0, 2]} near={0.01} far={1000} />
-  <OrbitControls />
+  <OrbitControls enableDamping={false} zoomSpeed={4}/>
   </>
   )
 }

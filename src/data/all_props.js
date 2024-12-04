@@ -1,8 +1,17 @@
 import { Vector3,Color } from "three"
+
+
+// diamond 16777215
+// gold 16434308
+// gold2 16695418
 export const paramsMaterial = {
     metal : {
+        specular:{
+             value:16777215,
+            type:"vec3"
+        },
         color: {
-            value:16434308,
+            value:16695418,
             type:"vec3"
         },
         useEnvMap: {
@@ -10,7 +19,7 @@ export const paramsMaterial = {
             type:"bool"
         },
         roughness:{
-            value:0.1,
+            value:0,
             range:[0,1],
             type:"float"
         },

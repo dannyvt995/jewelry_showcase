@@ -7,7 +7,6 @@ import React, { useRef } from 'react'
 import { useThree } from '@react-three/fiber';
 import { useStoreAsset } from '../../store/useStoreAsset.js';
 
-
 import { paramsMaterial, checkDiamond } from '../../data/all_props.js';
 
 import { createMaterialGui } from '../../hooks/useMaterialGUI.js'
@@ -27,7 +26,8 @@ export default function HandleModel({ model, id }) {
     // console.log(value,`\\b${value}\\b`,child.name,regexDiamond.test(child.name))
 
     const refMatDefault = useRef(null)
-    const refMatDiamond = useRef(null)
+    const refMatDiamondTracing = useRef(null)
+    const refMatDiamondFake = useRef(null)
 
     const uniformsConfig = {
         //m4
@@ -58,7 +58,7 @@ export default function HandleModel({ model, id }) {
         tCubeMapNormals: { value: cubeMapTexture },
         //sampler2D
         envMap: { value: exrTexture },//sampler2D
-        transmissionSamplerMap: { value: hdrTexture },//sampler2D
+        transmissionSamplerMap: { value: exrTexture },//sampler2D
     }
 
 
@@ -68,29 +68,31 @@ export default function HandleModel({ model, id }) {
         refMatDefault.current = new THREE.MeshStandardMaterial({
             roughness: paramsMaterial.metal.roughness.value,
             metalness: paramsMaterial.metal.metalness.value,
-            envMap: paramsMaterial.metal.envMap.value,
-            color: paramsMaterial.metal.color.value
+            // envMap: hdrTexture,
+            // envMapRotation: 0,
+            color: paramsMaterial.metal.color.value,
         });
+        console.log(refMatDefault)
         createMaterialGui(gui, 'Metal', paramsMaterial.metal, refMatDefault);
 
 
-        const useDiamondFake = true
+        const useDiamondFake = false
         if (!useDiamondFake) {
-            refMatDiamond.current = createMaterialDiamond({
+            refMatDiamondTracing.current = createMaterialDiamond({
                 envMap: hdrTexture,
                 bounces: paramsMaterial.diamond.bounces.value,
                 color: paramsMaterial.diamond.color.value,
                 ior: paramsMaterial.diamond.ior.value,
-                correctMips: false,
+                correctMips: true,
                 projectionMatrixInv: camera.projectionMatrixInverse,
                 viewMatrixInv: camera.matrixWorld,
-                chromaticAberration: true,
+                chromaticAberration: false,
                 aberrationStrength: paramsMaterial.diamond.aberrationStrength.value,
                 resolution: new THREE.Vector2(clientWidth, clientHeight)
             })
-            createMaterialGui(gui, 'Diamond', paramsMaterial.diamond, refMatDiamond);
+            createMaterialGui(gui, 'Diamond', paramsMaterial.diamond, refMatDiamondTracing);
         } else {
-            refMatDiamond.current = createMaterialDiamondFake({
+            refMatDiamondFake.current = createMaterialDiamondFake({
                 uniforms: uniformsConfig
             })
         }
@@ -99,15 +101,16 @@ export default function HandleModel({ model, id }) {
 
 
 
+
        
         
 
-
+        
         model.traverse((child) => {
             if (child.type === "Mesh") {
                 // console.log(child.name)
                 if (child.material && child.material.dispose) {
-                    child.material.dispose();
+                   // child.material.dispose();
                 }
                 if (checkDiamond({
                     childName: child.name,
@@ -115,16 +118,17 @@ export default function HandleModel({ model, id }) {
                 })) {
                     if (!useDiamondFake) {
                         let colliderForThis = initBvhForDiamond(child.geometry)
-                        refMatDiamond.current.uniforms.bvh.value.updateFrom(colliderForThis.collider.boundsTree);
+                        refMatDiamondTracing.current.uniforms.bvh.value.updateFrom(colliderForThis.collider.boundsTree);
 
                         bvhDispose(colliderForThis)
-                        child.material = refMatDiamond.current;
+                        child.material = refMatDiamondTracing.current;
 
                     } else {
-
-                        const modelOffsetMatrix = child.matrixWorld; // Ma trận thế giới của mô hình
+                        // const modelOffsetMatrix = camera.projectionMatrix; 
+                        // const modelOffsetMatrixInv = camera.projectionMatrixInverse
+                        const modelOffsetMatrix = child.matrixWorld; 
                         const modelOffsetMatrixInv = new THREE.Matrix4().copy(modelOffsetMatrix).invert();
-                        child.material = refMatDiamond.current;
+                        child.material = refMatDiamondFake.current;
                         child.material.uniforms.modelOffsetMatrix.value =  modelOffsetMatrix
                         child.material.uniforms.modelOffsetMatrixInv.value =  modelOffsetMatrixInv
                     }
@@ -135,19 +139,28 @@ export default function HandleModel({ model, id }) {
                 } else {
                     child.material = refMatDefault.current;
                 }
+
+                child.castShadow = true; 
             }
         });
-
+  
+      
         return () => {
             if (gui) gui.destroy();
             if (refMatDefault.current) {
                 disposeRefMaterial(refMatDefault.current)
                 refMatDefault.current = null
             }
-            if (refMatDiamond.current) {
-                disposeRefMaterial(refMatDiamond.current)
-                refMatDiamond.current = null
+            if (refMatDiamondTracing.current) {
+                disposeRefMaterial(refMatDiamondTracing.current)
+                refMatDiamondTracing.current = null
             }
+
+            if (refMatDiamondFake.current) {
+                disposeRefMaterial(refMatDiamondFake.current)
+                refMatDiamondFake.current = null
+            }
+
             model.traverse((child) => {
                 if (child.type === "Mesh") {
                     if (child.geometry) {
@@ -169,8 +182,8 @@ export default function HandleModel({ model, id }) {
 
 
     React.useEffect(() => {
-        //   if (priRefSam.current) priRefSam.current.rotation.x = -5
-
+       //   if (priRefSam.current) priRefSam.current.rotation.x = -5
+        
         return () => {
             model.traverse((child) => {
                 if (child.type === "Mesh") {
@@ -194,10 +207,10 @@ export default function HandleModel({ model, id }) {
 
 
     return (
-
-        <Resize>
+        <Resize name='GroupTarget'>
             <primitive ref={priRefSam} object={model} />
         </Resize>
+    
 
     )
 }
@@ -209,6 +222,12 @@ const bvhDispose = (ref) => {
         ref.collider.material.dispose()
         ref.collider = null
         ref = null
+    }
+}
+
+const disposeGroupMaterial = (listMat) => {
+    for (let i = 0; i < listMat.length; i++) {
+        
     }
 }
 

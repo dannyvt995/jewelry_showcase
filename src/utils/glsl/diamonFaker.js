@@ -96,6 +96,8 @@ uniform float envMapRotation;
 uniform vec4 envMapRotationQuat;
 uniform float reflectivity;
 
+#define RAY_BOUNCES 5
+
 vec3 BRDF_Specular_GGX_Environment(const in vec3 viewDir, const in vec3 normal, const in vec3 specularColor, const in float roughness) {
     float dotNV = abs(dot(normal, viewDir));
     const vec4 c0 = vec4(-1, -0.0275, -0.572, 0.022);
@@ -175,13 +177,13 @@ vec3 getSurfaceNormal(vec4 surfaceInfos) {
 vec3 intersect(vec3 rayOrigin, vec3 rayDirection) {
     vec3 sphereHitPoint = intersectSphere(rayOrigin, rayDirection);
     vec3 direction1 = normalize(sphereHitPoint-(centerOffset) );
-    vec4 normalDistanceData1 = getNormalDistance(direction1);
+    vec4 normalDistanceData1 = getNormalDistance(direction1) ;
     float distance1 = normalDistanceData1.a*radius;
     vec3 pointOnPlane1 = (centerOffset) +direction1*distance1;
     vec3 planeNormal1 = getSurfaceNormal(normalDistanceData1);
     vec3 hitPoint1 = linePlaneIntersect(rayOrigin, rayDirection, pointOnPlane1, planeNormal1);
     vec3 direction2 = normalize(hitPoint1-(centerOffset) );
-    vec4 normalDistanceData2 = getNormalDistance(direction2);
+    vec4 normalDistanceData2 = getNormalDistance(direction2)  ;
     float distance2 = normalDistanceData2.a*radius;
     vec3 pointOnPlane2 = (centerOffset) +direction2*distance2;
     vec3 hitPoint = hitPoint1;
@@ -213,7 +215,7 @@ vec3 getRefractionColor(vec3 origin, vec3 direction, vec3 normal) {
     mat4 invModelOffsetMatrix = modelOffsetMatrixInv;
     newDirection = normalize((invModelOffsetMatrix*vec4(newDirection, 0.)).xyz);
     origin = (invModelOffsetMatrix*vec4(origin, 1.)).xyz;
-    for(int i = 0;i<5;i++) {
+    for(int i = 0;i<RAY_BOUNCES;i++) {
         vec3 intersectedPos = intersect(origin, newDirection);
         vec3 dist = intersectedPos-origin;
         vec3 d = normalize(intersectedPos-(centerOffset) );
@@ -228,7 +230,7 @@ vec3 getRefractionColor(vec3 origin, vec3 direction, vec3 normal) {
         newDirection = refract(newDirection, mappedNormal, refractiveIndex/n1);
         if(dot(newDirection, newDirection)<epsilon) {
             newDirection = reflect(oldDir, mappedNormal);
-            if(i == 5-1) {
+            if(i == RAY_BOUNCES-1) {
                 vec3 brdfReflected = BRDF_Specular_GGX_Environment(-oldDir, mappedNormal, vec3(f0), 0.);
                 vec3 d1 = mat3(modelOffsetMatrix)*oldDir;
                 d1 = normalize(d1);
@@ -260,7 +262,7 @@ vec3 getRefractionColor(vec3 origin, vec3 direction, vec3 normal) {
     return outColor;
 }
 void main() {
-    vec3 normalizedNormal = normalize(vWorldNormal);
+      vec3 normalizedNormal = normalize(vWorldNormal);
     vec3 viewVector = normalize(vWorldPosition-cameraPosition);
     const float n1 = 1.;
     const float epsilon = 1e-4;
@@ -273,10 +275,13 @@ void main() {
     vec3 refractionColor = getRefractionColor(vWorldPosition, viewVector, normalizedNormal);
     vec3 normal = normalize(vNormal);
     vec3 diffuseColor = vec3(1.);
+    //  beforeAccumulation
+    
     gl_FragColor = vec4((refractionColor.rgb+reflectionColor.rgb)*diffuseColor, 1.);
-    gl_FragColor.rgb = pow(gl_FragColor.rgb, vec3(gammaFactor));
-    gl_FragColor = linearToOutputTexel( gl_FragColor );
- //   gl_FragColor = vec4(1.,.5,.1,1.);
+    // gl_FragColor.rgb = pow(gl_FragColor.rgb, vec3(gammaFactor));
+    // gl_FragColor = linearToOutputTexel( gl_FragColor );
+
+    //gl_FragColor=vec4(viewVector,1.);
 }
 
 `

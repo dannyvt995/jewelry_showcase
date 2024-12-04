@@ -45,7 +45,7 @@ const Model = React.memo(({ id }) => {
 
 
   useEffect(() => {
-    scene.environment = exrTexture
+     scene.environment = hdrTexture
      scene.background = exrTexture;
   }, [scene,areTexturesUpdated])
   

@@ -13,6 +13,8 @@ import {
 } from 'postprocessing'
 import { isWebGL2Available } from 'three-stdlib'
 
+//import {N8AOPostPass } from "n8ao"
+
 export const EffectComposerContext = createContext(null)
 const isConvolution = (effect) => (effect.getAttributes() & EffectAttribute.CONVOLUTION) === EffectAttribute.CONVOLUTION
 
@@ -50,6 +52,9 @@ export const EffectComposer = React.memo(
 
         effectComposer.addPass(new RenderPass(scene, camera))
 
+       
+
+
         let downSamplingPass = null
         let normalPass = null
         if (enableNormalPass) {
@@ -62,7 +67,13 @@ export const EffectComposer = React.memo(
             effectComposer.addPass(downSamplingPass)
           }
         }
-
+      //   const n8aopass = new N8AOPostPass(
+      //     scene,
+      //     camera,
+      //     window.innerWidth,
+      //     window.innerHeight
+      // );
+      // effectComposer.addPass(n8aopass)
         return [effectComposer, normalPass, downSamplingPass]
       }, [camera, gl, depthBuffer, stencilBuffer, multisampling, frameBufferType, scene, enableNormalPass, resolutionScale])
 

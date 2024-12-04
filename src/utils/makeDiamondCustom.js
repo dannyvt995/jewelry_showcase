@@ -55,7 +55,7 @@ export const createMaterialDiamond = ({
         },
         vertexShader: vertDiamond,
         fragmentShader: fragDiamond,
-      //  side:2
+       
     })
 
     return material
@@ -72,7 +72,7 @@ export const createMaterialDiamondFake = ({
         uniforms: uniforms,
         vertexShader: vertDiamondFaker,
         fragmentShader: fragDiamonFaker,
-      //  wireframe:true
+     
     })
 
     return material
