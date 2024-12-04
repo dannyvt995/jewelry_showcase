@@ -1,3 +1,4 @@
+import { Vector3 } from "three";
 
 
 export  const createMaterialGui = (GUI,folderName, materialParams, refMaterial) => {
@@ -12,7 +13,11 @@ export  const createMaterialGui = (GUI,folderName, materialParams, refMaterial) 
                 console.log(key)
                 folder.addColor(param, 'value').name(key).onChange(() => {
                     if(folderName === "Metal") refMaterial.current.color.set(param.value); 
-                    if(folderName === "Diamond") refMaterial.current.uniforms.color.value.set(param.value);
+                    if(folderName === "Diamond") {
+                       
+                        refMaterial.current.uniforms.color.value = new Vector3(param.value.r,param.value.g,param.value.b)
+                       
+                    }
                 });
             } else if (param.type === "bool") {
                 folder.add(param, 'value').name(key).onChange((value) => {

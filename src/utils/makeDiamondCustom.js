@@ -1,15 +1,35 @@
 import {
     MeshBVH,
     MeshBVHUniformStruct,
-    SAH
+    SAH,
+    MeshBVHVisualizer
 } from '../lib/three-mesh-bvh@0.5.10';
 import {Mesh,ShaderMaterial} from 'three'
 import { vertDiamond, fragDiamond } from './glsl/diamondN8'
 export const initBvhForDiamond = (geometry) => {
-    geometry.boundsTree = new MeshBVH(geometry.toNonIndexed(), { lazyGeneration: false, strategy: SAH });
-    const collider = new Mesh(geometry);
-    collider.boundsTree = geometry.boundsTree;
-    return collider
+    const mergedGeometry = geometry;
+    mergedGeometry.boundsTree = new MeshBVH(mergedGeometry.toNonIndexed(), { lazyGeneration: false, strategy: SAH });
+    const collider = new Mesh(mergedGeometry);
+    collider.boundsTree = mergedGeometry.boundsTree;
+
+    
+   
+   
+    collider.material.wireframe = true;
+    collider.material.opacity = 0.5;
+    collider.material.transparent = true;
+    collider.visible = false;
+   
+    let  visualizer
+    // visualizer = new MeshBVHVisualizer(collider, 20);
+    // visualizer.visible = true;
+    // visualizer.update();
+
+
+    return {
+        collider:collider,
+        visualizer:visualizer ? visualizer : null
+    }
 }
 
 export const createMaterialDiamond = ({
@@ -33,7 +53,8 @@ export const createMaterialDiamond = ({
             resolution: { value: resolution }
         },
         vertexShader: vertDiamond,
-        fragmentShader: fragDiamond
+        fragmentShader: fragDiamond,
+      //  side:2
     })
 
     return material

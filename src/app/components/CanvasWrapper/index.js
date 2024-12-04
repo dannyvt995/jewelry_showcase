@@ -5,7 +5,7 @@ import { Perf } from 'r3f-perf'
 import {useEffect,useState} from 'react'
 
 import { Pathtracer, PhysicalCamera, Fog } from '../../../utils/Pathtracer.js'
-import LoadControls from '../../jewelrySpace/src/LoadControls/index.js'
+import LoadControls from '../../jewelryModuleProgress/LoadControls/index.js'
 export default function CanvasWrapper() {
     console.log("==> INIT CanvasWrapper ONCE TIME");
     
