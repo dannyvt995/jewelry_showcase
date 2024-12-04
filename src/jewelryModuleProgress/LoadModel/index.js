@@ -8,17 +8,18 @@ import useLoaderStore from '../../store/useStoreLoader.js';
 const Model = React.memo(({ id }) => {
   const [model, setModel] = useState(null);
   const { scene } = useThree();
-  const loader = useLoaderStore((state) => state.loaderModel);
+  const loaderModel = useLoaderStore((state) => state.loaderModel);
+  
   const { areTexturesUpdated } = useStoreAsset();
   const modelRef = useRef(null); // Ref giữ tham chiếu tới model
-  const { hdrTexture } = useStoreAsset();
+  const { exrTexture, hdrTexture } = useStoreAsset();
 
   useEffect(() => {
     let isMounted = true;
 
     if (isMounted) {
 
-      loader.load(`/ring/collection/${id}.glb`, (gltf) => {
+      loaderModel.load(`/ring/collection/${id}.glb`, (gltf) => {
 
 
         const clonedModel = gltf.scene.clone(true);
@@ -40,12 +41,12 @@ const Model = React.memo(({ id }) => {
 
       }
     };
-  }, [id, loader, scene]);
+  }, [id, loaderModel, scene]);
 
 
   useEffect(() => {
-    scene.environment = hdrTexture
-    scene.background = hdrTexture;
+    scene.environment = exrTexture
+     scene.background = exrTexture;
   }, [scene,areTexturesUpdated])
   
   return (model && areTexturesUpdated) ? <HandleModel model={model} id={id} /> : null;
@@ -119,7 +120,7 @@ const clearTextureInMaterial = (material) => {
     material.uniforms.envMap.value.dispose();
     material.uniforms.envMap.value = null;
   }
-  if (material.uniforms && material.uniforms.bvh.value) {
+  if (material.uniforms &&  material.uniforms.bvh && material.uniforms.bvh.value) {
     material.uniforms.bvh.value.bvhBounds.dispose();
     material.uniforms.bvh.value.bvhContents.dispose();
     material.uniforms.bvh.value.index.dispose();

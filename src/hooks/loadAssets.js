@@ -5,14 +5,15 @@ import { useStoreAsset } from '../store/useStoreAsset';
 import * as THREE from 'three';
 import useLoaderStore from '../store/useStoreLoader'
 export const useLoadTextures = () => {
-    const loader = useLoaderStore((state) => state.loaderExr);
+    const loaderExr = useLoaderStore((state) => state.loaderExr);
+    const loaderCubeTexture = useLoaderStore((state) => state.loaderCubeTexture);
     const { setTextures } = useStoreAsset();
 
     useEffect(() => {
         const loadExrTexture = () => {
             return new Promise((resolve, reject) => {
-                loader.load(
-                    '/ring/env/env-metal-008.exr',
+                loaderExr.load(
+                    '/ring/env/env-gem-002.exr',
                     (texture) => {
                         texture.mapping = THREE.EquirectangularReflectionMapping;
                         resolve({ exrTexture: texture });
@@ -26,17 +27,30 @@ export const useLoadTextures = () => {
         };
 
         const loadHdrTexture = () => {
-            return loader.loadAsync('/ring/env/env-gem-002.exr').then((texture) => {
+            return loaderExr.loadAsync('/ring/env/env-metal-008.exr').then((texture) => {
                 texture.mapping = THREE.EquirectangularReflectionMapping;
                 return { hdrTexture: texture };
             });
         };
-
-        Promise.all([loadExrTexture(), loadHdrTexture()])
-            .then(([exrResult, hdrResult]) => {
+        const loadCubeMapTexture = () => {
+            return loaderCubeTexture.setPath( '/ring/cubemap/' ).loadAsync([
+                'px.png',
+                'nx.png',
+                'py.png',
+                'ny.png',
+                'pz.png',
+                'nz.png'
+              ]).then((texture) => {
+               
+                return { cubeMapTexture: texture };
+            });
+        };
+        Promise.all([loadExrTexture(), loadHdrTexture(),loadCubeMapTexture()])
+            .then(([exrResult, hdrResult,cubemapResult]) => {
                 setTextures({
                     exrTexture: exrResult.exrTexture,
                     hdrTexture: hdrResult.hdrTexture,
+                    cubeMapTexture:cubemapResult.cubeMapTexture
                 });
                 console.log("==> Textures load complete");
             })
@@ -48,6 +62,6 @@ export const useLoadTextures = () => {
         return () => {
             console.log("Clean up useLoadTextures");
         };
-    }, [loader,setTextures]);
+    }, [loaderExr,setTextures,loaderCubeTexture]);
 
 };

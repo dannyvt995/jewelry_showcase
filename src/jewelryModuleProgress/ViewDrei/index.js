@@ -19,7 +19,7 @@ function ViewDrei({ modelId }) {
                 <ViewPostProcessing multisampling={1} stencilBuffer={false} depthBuffer={false} disableNormalPass={false}>
                     {/*  <Noise opacity={0.75} blendFunction={BlendFunction.OVERLAY} /> */}
                     {/* <ChromaticAberration radialModulation={true} modulationOffset={0.4} offset={[0.01, 0.01]} /> */}
-                   {/*  <Bloom mipmapBlur levels={2} luminanceThreshold={.8} intensity={.5} /> */}
+                    <Bloom mipmapBlur levels={2} luminanceThreshold={.8} intensity={.5} />
                     {/*   <N8AO color="black" aoRadius={12} intensity={50.15} /> */}
                 </ViewPostProcessing>
     

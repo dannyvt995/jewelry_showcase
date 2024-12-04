@@ -6,6 +6,7 @@ import {
 } from '../lib/three-mesh-bvh@0.5.10';
 import {Mesh,ShaderMaterial} from 'three'
 import { vertDiamond, fragDiamond } from './glsl/diamondN8'
+import { vertDiamondFaker, fragDiamonFaker } from './glsl/diamonFaker'
 export const initBvhForDiamond = (geometry) => {
     const mergedGeometry = geometry;
     mergedGeometry.boundsTree = new MeshBVH(mergedGeometry.toNonIndexed(), { lazyGeneration: false, strategy: SAH });
@@ -55,6 +56,23 @@ export const createMaterialDiamond = ({
         vertexShader: vertDiamond,
         fragmentShader: fragDiamond,
       //  side:2
+    })
+
+    return material
+}
+
+
+
+
+export const createMaterialDiamondFake = ({
+    uniforms
+}) => {
+
+    const material = new ShaderMaterial({
+        uniforms: uniforms,
+        vertexShader: vertDiamondFaker,
+        fragmentShader: fragDiamonFaker,
+      //  wireframe:true
     })
 
     return material
