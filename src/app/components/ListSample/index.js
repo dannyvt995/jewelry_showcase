@@ -63,7 +63,7 @@ const ListSample = React.memo(() => {
 
       {selectedItem && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className={`${s.modalView} bg-white p-8 rounded-xl shadow-2xl`}>
+          <div className={`${s.modalView} bg-white p-8 rounded-xl shadow-2xl`} id="modeView">
             <h2 className="text-3xl font-bold text-gray-800">{selectedItem.title}</h2>
             <p className="mt-4 text-gray-700">{selectedItem.content}</p>
             <ViewEffectsWrapper className={s.view} /* dpr={[1, 2]} */>

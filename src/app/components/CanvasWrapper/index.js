@@ -31,7 +31,7 @@ export default function CanvasWrapper() {
 
          
             <Preload all />
-            <Perf />
+            <Perf position ='top-left'/>
 
         </Canvas>
 

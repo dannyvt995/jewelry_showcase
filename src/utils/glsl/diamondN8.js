@@ -1,7 +1,7 @@
 import {
     shaderStructs,
     shaderIntersectFunction,
-} from '../../../../lib/three-mesh-bvh@0.5.10';
+} from '../../lib/three-mesh-bvh@0.5.10';
 export const vertDiamond = `
     varying vec3 vWorldPosition;
     varying vec3 vNormal;

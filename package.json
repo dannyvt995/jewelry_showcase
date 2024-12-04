@@ -12,6 +12,7 @@
     "@react-three/drei": "^9.119.0",
     "@react-three/fiber": "^8.17.10",
     "@react-three/postprocessing": "^2.16.3",
+    "dat.gui": "^0.7.9",
     "leva": "^0.9.35",
     "next": "^14.0.2",
     "postprocessing": "^6.36.4",
