@@ -1,0 +1,69 @@
+.module {
+    position: relative;
+  
+}
+.heroSlider{
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+}
+.part1{
+    position: relative;
+    margin: auto;
+    height: fit-content;
+    width: fit-content;
+}
+.part2 {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+
+}
+.buttonNext {
+    position: absolute;
+    bottom:12rem;
+    right:12rem;
+    background-color: brown;
+    font-size: 2rem;
+    padding: 1rem;
+}
+.text {
+    position: absolute;
+    width:  100%;
+    height: 100%;
+    display: grid;
+    grid-template-rows: 1fr;
+    grid-template-columns: 1fr;
+}
+.text::before{
+    content: "";
+    position: absolute;
+    width:  200%;
+    height: 100%;
+    left: -50%;
+    top:50%;
+    background-color: rgb(255, 255, 255);
+    z-index: 5;
+}
+.text h1{
+    position: relative;
+    grid-row: 1;
+    grid-column: 1;
+    height: 100%;
+    font-size: 6vw;
+    line-height: 100%;
+    letter-spacing: 0;
+    font-weight: bold;
+    text-transform: uppercase;
+    
+}
+.img {
+    position: relative;
+    z-index: 9;
+    margin: auto;
+    width: 25vw;
+    aspect-ratio: 1/1;
+    background-image: url(/envc4.png);
+    clip-path: circle(50% at 50% 50%);
+}

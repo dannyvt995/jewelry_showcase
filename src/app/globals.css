@@ -15,12 +15,19 @@
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
+  overflow-x: hidden;
+
   font-family: Arial, Helvetica, sans-serif;
 }
 
 
 .dg.ac {
  z-index: 99999 !important;
+}
+
+.active1 {
+  position: absolute;
+  left: 0;
+  top: 0;
+  
 }
