@@ -140,7 +140,7 @@ export default function HandleModel({ model, id }) {
                     child.material = refMatDefault.current;
                 }
 
-                child.castShadow = true; 
+              
             }
         });
   
